@@ -71,3 +71,4 @@ RUN git clone https://github.com/google/googletest.git \
     && cd ../.. \
     && rm -r googletest
 
+RUN apt-get -y install git ssh
