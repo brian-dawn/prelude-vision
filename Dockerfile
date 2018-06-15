@@ -1,6 +1,6 @@
-FROM nvidia/cuda:9.2-devel-ubuntu18.04
+FROM ubuntu:18.04
 
-RUN apt-get update
+RUN apt-get update && apt-get install -y nvidia-cuda-toolkit
 
 RUN DEBIAN_FRONTEND=noninteractive \
   apt-get install -y \
@@ -39,9 +39,9 @@ RUN \
     -D INSTALL_PYTHON_EXAMPLES=OFF \
     -D INSTALL_C_EXAMPLES=OFF \
     -D WITH_OPENGL=OFF \
-    -D WITH_CUDA=ON \
+    -D WITH_CUDA=OFF \
     -D ENABLE_FAST_MATH=1 \
-    -D CUDA_FAST_MATH=1 \
+    -D CUDA_FAST_MATH=0 \
     -D WITH_CUBLAS=1 \
     -D BUILD_opencv_ximgproc=ON \
     -D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules \
@@ -71,4 +71,15 @@ RUN git clone https://github.com/google/googletest.git \
     && cd ../.. \
     && rm -r googletest
 
-RUN apt-get -y install git ssh
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y install git ssh
+RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
+    echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
+
+ENV PATH /usr/local/nvidia/bin:/usr/local/cuda/bin:${PATH}
+ENV LD_LIBRARY_PATH /usr/local/nvidia/lib:/usr/local/nvidia/lib64
+
+# nvidia-container-runtime
+ENV NVIDIA_VISIBLE_DEVICES all
+ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
+ENV NVIDIA_REQUIRE_CUDA "cuda>=9.1"
+
